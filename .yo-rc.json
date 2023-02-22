@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "16.16.0",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.4.1"
+    },
+    "version": "1.16.1",
+    "libraryName": "survey-form",
+    "libraryId": "55fc07dc-4493-4835-aa89-b1e71bb918fe",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "surveyForm",
+    "solutionShortDescription": "surveyForm description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
