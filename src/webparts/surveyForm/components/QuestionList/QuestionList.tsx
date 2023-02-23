@@ -22,8 +22,8 @@ const QuestionList = (props: any) => {
     const [age, setAge] = React.useState<string | null>(null);
     const [_birthday, setBirthday] = React.useState<Date | null>(null);
     const [showRating, setShowRating] = useState<boolean>(false);
-    const [rating, setRating] = useState<number>(0);
-    const [languageSkill, setLanguageSkill] = useState<string[]>([]);
+    const [_rating, setRating] = useState<number>(0);
+    const [_languageSkill, setLanguageSkill] = useState<string[]>([]);
 
     const handleSubmitQuestion_1 = (e: React.FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
@@ -67,16 +67,19 @@ const QuestionList = (props: any) => {
         // Call API to update data
         const updateData = async (itemId: number, listName: string) => {
             try {
-                const updatedData = await _sp.web.lists.getByTitle(listName).items.getById(itemId).update(
-                    {
-                        ...data[currentUserId - 1],
-                        Question_1: answer_1,
-                        Question_2: languageSkill,
-                        Question_3: _birthday,
-                        Question_4: rating,
-                        HasAnswered: true,
-                    },
-                );
+                const updatedData = await _sp.web.lists.getByTitle(listName).items.getById(itemId).update({
+                    Question_1: answer_1,
+                    Question_2: _languageSkill,
+                    Question_3: _birthday ? _birthday.toISOString() : new Date().toISOString(),
+                    Question_4: _rating,
+                    HasAnswered: true,
+                }).then((res: any) => {
+                    // Handle success
+                    console.log("res", res);
+                }).catch((error: any) => {
+                    // Handle error
+                    console.log("error", error);
+                });
                 console.log("updatedData", updatedData);
             }
             catch (error) {

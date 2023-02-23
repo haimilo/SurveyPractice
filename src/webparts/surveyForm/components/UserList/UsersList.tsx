@@ -1,5 +1,6 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { SPFI } from "@pnp/sp";
+import { format } from "date-fns";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { getSP } from "../../../../pnpConfiguration";
@@ -20,7 +21,9 @@ const UsersList = (props: IUsersList) => {
     const [isUserAnswered, setIsUserAnswered] = useState<boolean>(false);
     const [getStartSurvey, setGetStartSurvey] = useState<boolean>(false);
     const [currentUserId, setCurrentUserId] = useState<number>(0);
-    console.log("currentUserId", currentUserId);
+    const [currentUserResponse, setCurrentUserResponse] = useState<IUsersInfor>();
+    console.log(currentUserResponse);
+
     const getUsersData = async () => {
         try {
             const usersData = await _sp.web.lists.getByTitle(LIST_NAME).items();
@@ -42,6 +45,27 @@ const UsersList = (props: IUsersList) => {
                 usersData.filter((user: IUsersInfor) => {
                     return user.Email === props.Email;
                 })[0].Id
+            );
+        } catch (error) {
+            console.log("error", error);
+        }
+    }
+
+    const handleViewMyResponse = async () => {
+        try {
+            const currentUserResponseAPI = await _sp.web.lists.getByTitle(LIST_NAME).items.getById(currentUserId)();
+            console.log("currentUserResponseAPI", currentUserResponseAPI);
+            setCurrentUserResponse(
+                {
+                    Title: currentUserResponseAPI.Title,
+                    Email: currentUserResponseAPI.Email,
+                    Id: currentUserResponseAPI.Id,
+                    HasAnswered: currentUserResponseAPI.HasAnswered,
+                    Question_1: currentUserResponseAPI.Question_1 ? currentUserResponseAPI.Question_1 : '',
+                    Question_2: currentUserResponseAPI.Question_2 ? currentUserResponseAPI.Question_2 : [''],
+                    Question_3: currentUserResponseAPI.Question_3 ? currentUserResponseAPI.Question_3 : new Date(),
+                    Question_4: currentUserResponseAPI.Question_4 ? currentUserResponseAPI.Question_4 : 0,
+                }
             );
         } catch (error) {
             console.log("error", error);
@@ -102,15 +126,16 @@ const UsersList = (props: IUsersList) => {
                     })}
                 </tbody>
             </table>
-            <hr />
             {/* Survey Form */}
             <div>
+                <hr />
                 <h3>Survey Form</h3>
                 {
                     isUserAnswered ?
                         <div>
                             <p>You have already answered the survey</p>
                             <button className={styles.surveyFormButton}
+                                onClick={handleViewMyResponse}
                             >View My Response</button>
                         </div> :
                         <div className={styles.surveyFormNotAnswered}>
@@ -129,6 +154,99 @@ const UsersList = (props: IUsersList) => {
                         </div>
                 }
             </div>
+            {/* Response Data */}
+            {
+                currentUserResponse &&
+                <div>
+                    <hr />
+                    <h3>My Response</h3>
+                    <h4>
+                        Current User: {currentUserResponse?.Title}
+                    </h4>
+                    <h4>
+                        Current User Email: {currentUserResponse?.Email}
+                    </h4>
+                    <table
+                        style={{
+                            border: '1px solid black',
+                            borderCollapse: 'collapse',
+                            width: '100%',
+                            borderRadius: '8px',
+                        }}
+                    >
+                        <thead>
+                            <tr
+                                style={{
+                                    backgroundColor: '#f2f2f2',
+                                    borderBottom: '1px solid black',
+                                }}
+                            >
+                                <th >Question 1</th>
+                                <th >Question 2</th>
+                                <th >Question 3</th>
+                                <th >Question 4</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td
+                                    style={{
+                                        textAlign: 'center',
+                                        verticalAlign: 'middle',
+                                        border: '1px solid black',
+                                    }}
+                                >
+                                    {currentUserResponse?.Question_1}
+                                </td>
+                                <td>
+                                    <ul
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            listStyle: 'none',
+                                            padding: '0',
+                                        }}
+                                    >
+                                        {currentUserResponse?.Question_2.map((item: string, index: number) => {
+                                            return (
+                                                <li key={index}
+                                                    style={{
+                                                        margin: '0',
+                                                        padding: '8px',
+                                                        // '&:nth-child(odd)': 'background-color: #f2f2f2',
+                                                    }}
+                                                >
+                                                    {item}
+                                                </li>
+                                            )
+                                        })}
+                                    </ul>
+                                </td>
+                                <td
+                                    style={{
+                                        textAlign: 'center',
+                                        verticalAlign: 'middle',
+                                        border: '1px solid black',
+                                    }}
+                                >
+                                    {
+                                        format(new Date(currentUserResponse?.Question_3.toString()), 'dd/MM/yyyy')
+                                    }
+                                </td>
+                                <td
+                                    style={{
+                                        textAlign: 'center',
+                                        verticalAlign: 'middle',
+                                        border: '1px solid black',
+                                    }}
+                                >
+                                    {currentUserResponse?.Question_4}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
             <hr />
         </div>
     )
